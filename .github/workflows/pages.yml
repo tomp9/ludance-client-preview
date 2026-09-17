@@ -1,0 +1,27 @@
+name: Validate client preview
+
+on:
+  push:
+    branches: [main, 'codex/**']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: client-preview-validation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Validate HTML/CSS/JS files exist
+        run: |
+          test -f index.html
+          test -f assets/css/style.css
+          test -f assets/js/main.js
