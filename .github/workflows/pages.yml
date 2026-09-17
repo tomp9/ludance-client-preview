@@ -2,6 +2,8 @@ name: Deploy client preview
 
 on:
   push:
+    branches: [main, 'codex/**']
+  pull_request:
     branches: [main]
   workflow_dispatch:
 
@@ -11,11 +13,24 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages
+  group: pages-preview-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Validate HTML/CSS/JS files exist
+        run: |
+          test -f index.html
+          test -f assets/css/style.css
+          test -f assets/js/main.js
+
   deploy:
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    needs: validate
     runs-on: ubuntu-latest
     environment:
       name: github-pages
