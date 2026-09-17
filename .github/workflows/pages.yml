@@ -1,4 +1,4 @@
-name: Deploy client preview
+name: Validate client preview
 
 on:
   push:
@@ -9,11 +9,9 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
-  group: pages-preview-${{ github.ref }}
+  group: client-preview-validation-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -27,23 +25,3 @@ jobs:
           test -f index.html
           test -f assets/css/style.css
           test -f assets/js/main.js
-
-  deploy:
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
-    needs: validate
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: .
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
